@@ -1,0 +1,884 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Proteins in 3D – UniProt, PDB, AlphaFold &amp; molecular graphics</title>
+<meta name="description" content="A self-contained practical: find a protein in UniProt, explore its structures from the PDB and AlphaFold in an embedded 3D viewer, and make a labelled figure.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2310263a'/%3E%3Cpath d='M5 21c3-9 6 3 9-5s6 3 9-5' fill='none' stroke='%233fb7a0' stroke-width='3' stroke-linecap='round'/%3E%3Ccircle cx='24' cy='22' r='3.2' fill='%23f28e2b'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="assets/css/app.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ============================ HEADER ============================ -->
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#17344d"/><path d="M5 21c3-9 6 3 9-5s6 3 9-5" fill="none" stroke="#3fb7a0" stroke-width="3" stroke-linecap="round"/><circle cx="24" cy="22" r="3.2" fill="#f28e2b"/></svg>
+      <div>
+        <div class="brand-title">Proteins in 3D</div>
+        <div class="brand-sub">Bioinformatics &amp; molecular graphics practical</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="progress-wrap" title="Activities and questions completed (saved in this browser)"><span class="progress-label">0% done</span><div class="progress"><i></i></div></div>
+    <button class="btn" id="answersBtn" type="button"><svg class="ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3v12M7 10l5 5 5-5M4 21h16"/></svg><span>My answers</span></button>
+    <button class="btn" id="helpBtn" type="button" title="Viewer controls"><svg class="ic" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M9.2 9a2.9 2.9 0 0 1 5.6 1c0 2-2.8 2.6-2.8 4M12 17.5h.01"/></svg><span>Controls</span></button>
+  </header>
+
+  <div class="main">
+    <!-- ============================ TUTORIAL ============================ -->
+    <aside class="tut" aria-label="Tutorial">
+      <nav class="ch-nav" aria-label="Chapters"></nav>
+
+<!-- =====================================================================
+     CHAPTER 0 · START HERE
+     ===================================================================== -->
+<section class="chapter" id="start" data-num="0" data-title="Start here" data-bench="viewer">
+  <h1>From sequence to structure: a receptor in 3D</h1>
+  <p class="lede">In this practical you will follow one drug target – <b>Toll-like receptor 4 (TLR4)</b> – from its entry in a protein database to its three-dimensional structure, compare an experimental structure with an <b>AlphaFold</b> prediction, and finish with a labelled figure of the kind you need for your coursework.</p>
+  <div class="meta-row"><span class="pill time">About 90 minutes</span><span class="pill">No software to install</span><span class="pill">Works in Chrome, Edge, Firefox or Safari</span></div>
+
+  <div class="callout info">
+    <div class="co-t">Everything happens on this page</div>
+    <p>Instructions are on the <b>left</b>. The <b>workbench</b> on the right has three tools: the <b>3D viewer</b> (replacing ICM-Browser), a <b>UniProt</b> explorer and a <b>PDB</b> explorer. They use live data from the real databases.</p>
+    <ul>
+      <li><button class="do showme" type="button" data-cmd="load 3fxi">like this</button> buttons do a step for you. Try each step yourself first and use them if you get stuck.</li>
+      <li>Activity steps <b>tick themselves</b> when the page sees you do them. You can also tick them yourself.</li>
+      <li>Your answers are saved in this browser. Use <b>My answers</b> (top right) to download them at any time.</li>
+    </ul>
+  </div>
+
+  <div class="name-field"><label for="studentName"><b>Your name</b> (optional – it goes on your downloaded answers):</label> <input id="studentName" type="text" data-student-name autocomplete="name"></div>
+
+  <h2>Why TLR4?</h2>
+  <p>TLR4 is the receptor that lets our innate immune system detect <b>lipopolysaccharide (LPS, endotoxin)</b> from the outer membrane of Gram-negative bacteria. Over-activation of TLR4 drives the inflammation of sepsis, so it has been a target for drugs such as the LPS antagonist <b>eritoran</b> and the small molecule <b>resatorvid (TAK-242)</b>. It is a good example of the four questions structure can answer (from the lecture):</p>
+  <div class="two-col">
+    <div class="cardlet"><h4>How does shape affect function?</h4><p>The curved, horseshoe-shaped TLR4 ectodomain – Chapter 3.</p></div>
+    <div class="cardlet"><h4>How does a protein interact with partners?</h4><p>TLR4 needs its co-receptor MD-2, and forms a dimer – Chapters 2 &amp; 3.</p></div>
+    <div class="cardlet"><h4>How do mutations affect function?</h4><p>The common Asp299Gly / Thr399Ile variants – Chapters 1 &amp; 3.</p></div>
+    <div class="cardlet"><h4>How do ligands and drugs interact?</h4><p>LPS in MD-2's pocket, and the antagonist eritoran – Chapter 3.</p></div>
+  </div>
+
+  <h2>Warm-up: your first structure</h2>
+  <div class="activity">
+    <div class="act-t">Activity 0 · Load, rotate, identify</div>
+    <ol class="steps">
+      <li data-task="w-load" data-auto="viewer:loaded id=3FXI">At the top of the <b>3D viewer</b>, type <code>3FXI</code> in the <b>PDB ID</b> box and press <b>Load</b>. <button class="do showme" type="button" data-cmd="load 3fxi">show me</button></li>
+      <li data-task="w-rotate">Left-drag to <b>rotate</b>, scroll (or pinch) to <b>zoom</b>, right-drag (or Ctrl + drag) to <b>move</b>. Press <span class="kbd">⟲</span> (top right of the viewer) to reset the view.</li>
+      <li data-task="w-hover" data-check="clickedAtom">Hover over the molecule: a label tells you what each part is. <b>Click</b> an atom to select its residue (green markers appear), then press <span class="kbd">Esc</span> to clear.</li>
+    </ol>
+  </div>
+
+  <table class="table">
+    <tr><th>To…</th><th>Mouse / trackpad</th></tr>
+    <tr><td>Rotate</td><td>Left-drag (one-finger drag on a touch screen)</td></tr>
+    <tr><td>Zoom</td><td>Scroll wheel, pinch, or Shift + left-drag</td></tr>
+    <tr><td>Move</td><td>Right-drag, or Ctrl/⌘ + left-drag</td></tr>
+    <tr><td>Select</td><td>Click (Shift-click adds, Ctrl/⌘-click toggles) · <span class="kbd">Esc</span> clears</td></tr>
+    <tr><td>Centre on a residue</td><td>Double-click it</td></tr>
+  </table>
+
+  <h2>Plan for today</h2>
+  <table class="table">
+    <tr><th>Chapter</th><th>What you will do</th><th>Time</th></tr>
+    <tr><td><button class="goto" data-goto="uniprot" type="button">1 · UniProt</button></td><td>Find human TLR4 and read its entry: function, location, variants, drugs, domains</td><td>25 min</td></tr>
+    <tr><td><button class="goto" data-goto="pdb" type="button">2 · The PDB</button></td><td>Find experimental structures and understand what is in them</td><td>10 min</td></tr>
+    <tr><td><button class="goto" data-goto="viewer" type="button">3 · 3D structure</button></td><td>Explore TLR4–MD-2–LPS: styles, colours, selections, the LPS binding site</td><td>30 min</td></tr>
+    <tr><td><button class="goto" data-goto="alphafold" type="button">4 · AlphaFold</button></td><td>Judge a predicted model with pLDDT and PAE and compare it with experiment</td><td>15 min</td></tr>
+    <tr><td><button class="goto" data-goto="figure" type="button">5 · Make a figure</button></td><td>Colours, key, labels and schematics – then save a high-resolution image</td><td>10 min</td></tr>
+    <tr><td><button class="goto" data-goto="yours" type="button">6 · Your receptor</button></td><td>Repeat the workflow for the receptor in your coursework</td><td>after class</td></tr>
+  </table>
+  <p class="hint">Sections marked <span class="pill ext">Extension</span> are optional and are not counted in your progress bar.</p>
+</section>
+
+<!-- =====================================================================
+     CHAPTER 1 · UNIPROT
+     ===================================================================== -->
+<section class="chapter" id="uniprot" data-num="1" data-title="UniProt" data-bench="uniprot" hidden>
+  <h1>UniProt: what do we know about a protein?</h1>
+  <div class="meta-row"><span class="pill time">≈ 25 min</span><span class="pill">Workbench: UniProt tab</span></div>
+  <p class="lede"><b>UniProt</b> (<a href="https://www.uniprot.org" target="_blank" rel="noopener">uniprot.org</a>) is a worldwide consortium that collects and annotates protein sequences and their functions. Each protein has an <b>entry</b> – like its home page – gathering information from experiments, the literature, analysis software and dozens of other databases.</p>
+  <div class="callout info">
+    <div class="co-t">Two halves of UniProtKB</div>
+    <p>Far too much sequence data arrives for every entry to be checked by hand, so UniProtKB has two parts: <b>Swiss-Prot</b> – <i>reviewed</i> entries curated by experts (★) – and <b>TrEMBL</b> – <i>unreviewed</i> entries annotated automatically. Every entry has a stable <b>accession</b> (e.g. <code>O00206</code>) and a readable <b>entry name</b> (e.g. <code>TLR4_HUMAN</code>).</p>
+  </div>
+
+  <h2 id="up-search">1.1 Find human TLR4</h2>
+  <div class="activity">
+    <div class="act-t">Activity 1.1 · Search UniProtKB</div>
+    <ol class="steps">
+      <li data-task="u-search" data-auto="uniprot:search query~toll-like receptor 4">In the <button class="goto" data-bench="uniprot" type="button">UniProt tab</button>, search for <code>toll-like receptor 4</code>. <button class="do showme" type="button" data-uniprot="search:toll-like receptor 4">show me</button></li>
+      <li data-task="u-look">Like a Google search, this returns everything. Look down the list: other Toll-like receptors (TLR9, TLR5…) and TLR4 from other animals (cat, horse, cow…) appear around the human protein – some of them above it. <b>Always double-check the protein name and the organism!</b></li>
+      <li data-task="u-filter" data-auto="uniprot:search human=true">Tick <b>Reviewed (Swiss-Prot) only</b> and <b>Human only</b> to narrow the results.</li>
+      <li data-task="u-open" data-auto="uniprot:entry acc=O00206">Click the accession of human Toll-like receptor 4 to open its entry. <button class="do showme" type="button" data-uniprot="entry:O00206">show me</button></li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-acc" data-accept="\b[o0]00206\b" data-hint="it is the 6-character code in the Entry column – it starts with the letter O">
+    <div class="q-text">What is the accession of human TLR4?</div>
+    <div class="q-model"><p><b>O00206</b> (entry name TLR4_HUMAN). Note that it starts with the letter O, not a zero.</p></div>
+  </div>
+  <div class="q" data-q="u-why-check">
+    <div class="q-text">Why is it important to check the organism and the Reviewed status before you use an entry?</div>
+    <div class="q-model"><p>Many proteins share a name across species (TLR4 in cat, horse, cow…) and related proteins appear in the same search (TLR9, TLR5…). Using the wrong entry gives the wrong sequence, residue numbers, variants and structures. Reviewed (Swiss-Prot) entries have been checked by curators against the literature; unreviewed (TrEMBL) entries are annotated automatically and may contain unverified predictions.</p></div>
+  </div>
+
+  <h2 id="up-function">1.2 Function</h2>
+  <p>The entry is organised into sections, listed down the left of the entry. <b>Function</b> summarises what the protein does, with references. <b>Gene Ontology (GO)</b> terms describe roles in words that computers can search; the code after each term shows the evidence (e.g. <code>IDA</code> = direct assay, <code>IEA</code> = automatic). Pathway databases such as <b>Reactome</b> place the protein in signalling pathways – e.g. <i>R-HSA-166016, Toll Like Receptor 4 (TLR4) Cascade</i>.</p>
+  <div class="activity">
+    <div class="act-t">Activity 1.2 · Read the Function section</div>
+    <ol class="steps">
+      <li data-task="u-func" data-auto="uniprot:section name=function">Open <b>Function</b> <button class="do showme" type="button" data-uniprot="entry:O00206#function">show me</button> and read the summary.</li>
+      <li data-task="u-go">Scan the GO terms and the Reactome pathways. Open <i>R-HSA-166016</i> if you would like to see the pathway diagram (it opens Reactome in a new tab).</li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-lps" data-accept="(lps|lipopolysacch|endotoxin).*(ly ?96|md\W?2|lymphocyte antigen|myeloid differentiation)||(ly ?96|md\W?2|lymphocyte antigen|myeloid differentiation).*(lps|lipopolysacch|endotoxin)" data-hint="name the bacterial molecule AND the co-receptor (its gene name is LY96)">
+    <div class="q-text">Which bacterial molecule does TLR4 respond to, and which protein does it cooperate with at the plasma membrane?</div>
+    <div class="q-model"><p><b>Lipopolysaccharide (LPS)</b> from Gram-negative bacteria, together with <b>LY96</b> – better known as <b>MD-2</b>. (CD14 is also part of the LPS receptor complex.)</p></div>
+  </div>
+  <div class="q" data-q="u-adaptors">
+    <div class="q-text">Name two adaptor proteins through which TLR4 signals inside the cell. What is the end result of the signal?</div>
+    <div class="q-model"><p><b>MYD88</b> and <b>TIRAP</b> (also called MAL), with <b>TRAF6</b> acting downstream. At the plasma membrane this leads to activation of <b>NF-κB</b>, secretion of pro-inflammatory cytokines and an inflammatory response. After TLR4 is taken into the cell by endocytosis, a <b>MyD88-independent</b> pathway uses TRAM (TICAM2) and TRIF (TICAM1), leading via TBK1 and IRF3 to production of <b>type I interferon</b>.</p></div>
+  </div>
+
+  <h2 id="up-names">1.3 Names &amp; taxonomy</h2>
+  <p>Different research groups often give the same protein different names, and the protein name may differ from its gene name. This section sorts that out. The official human gene symbol is set by the <b>HUGO Gene Nomenclature Committee (HGNC)</b>.</p>
+  <div class="activity">
+    <div class="act-t">Activity 1.3</div>
+    <ol class="steps">
+      <li data-task="u-names" data-auto="uniprot:section name=names">Open <b>Names &amp; Taxonomy</b>. <button class="do showme" type="button" data-uniprot="entry:O00206#names">show me</button></li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-cd" data-accept="cd\W?284" data-hint="look for “CD antigen name”">
+    <div class="q-text">Immunologists often use CD (“cluster of differentiation”) names. What is TLR4's CD name?</div>
+    <div class="q-model"><p><b>CD284</b>. (Its alternative name is hToll; the gene is <i>TLR4</i>, HGNC:11850.)</p></div>
+  </div>
+
+  <h2 id="up-location">1.4 Where is it? Subcellular location and topology</h2>
+  <div class="activity">
+    <div class="act-t">Activity 1.4 · From topology to 3D</div>
+    <ol class="steps">
+      <li data-task="u-loc" data-auto="uniprot:section name=location">Open <b>Subcellular Location</b>. <button class="do showme" type="button" data-uniprot="entry:O00206#location">show me</button> Compare the UniProt annotation with the Gene Ontology <i>cellular component</i> terms – they do not always agree.</li>
+      <li data-task="u-topo">Look at the <b>Topology</b> bar: extracellular (blue), transmembrane (orange), cytoplasmic (peach).</li>
+      <li data-task="u-tm3d" data-auto="uniprot:show3d label~transmembrane">Click the orange <b>transmembrane</b> segment. The page loads the AlphaFold model of TLR4 into the 3D viewer and highlights the helix that crosses the membrane. Come back to the UniProt tab afterwards.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-tm" data-accept="632\s*(-|–|to|and)\s*652" data-hint="give the first and last residue, e.g. 100-120">
+    <div class="q-text">Which residues form the transmembrane helix?</div>
+    <div class="q-model"><p>Residues <b>632–652</b>. The extracellular domain is 24–631 and the cytoplasmic domain 653–839.</p></div>
+  </div>
+  <div class="q" data-q="u-type1" data-type="mcq">
+    <div class="q-text">TLR4 is a “single-pass type I membrane protein”. Where is its N-terminus?</div>
+    <div class="mcq">
+      <label data-correct data-why="Type I proteins have their N-terminus outside the cell; for TLR4 that is the LPS-binding ectodomain."><input type="radio"> Outside the cell (extracellular)</label>
+      <label data-why="That is where the C-terminal TIR domain is."><input type="radio"> In the cytoplasm</label>
+      <label data-why="Only the 21-residue helix (632–652) is in the membrane."><input type="radio"> Buried in the membrane</label>
+    </div>
+  </div>
+
+  <h2 id="up-disease">1.5 Disease, variants and drugs</h2>
+  <div class="callout pharm">
+    <div class="co-t">Pharmacology link</div>
+    <p>This section links a protein to medicine: <b>natural variants</b> (differences between people), <b>mutagenesis</b> experiments (residues changed on purpose to test their role), associated diseases, and – under <b>Chemistry</b> – drugs and compounds from DrugBank, ChEMBL and the IUPHAR/BPS <i>Guide to Pharmacology</i>.</p>
+  </div>
+  <div class="activity">
+    <div class="act-t">Activity 1.5</div>
+    <ol class="steps">
+      <li data-task="u-dis" data-auto="uniprot:section name=disease">Open <b>Disease &amp; Variants</b>. <button class="do showme" type="button" data-uniprot="entry:O00206#disease">show me</button> Read the <i>Polymorphism</i> note.</li>
+      <li data-task="u-var3d" data-auto="uniprot:show3d label~299||uniprot:show3d label~399">In the natural-variants table, click the row for position <b>299</b> (or 399) to find that residue in 3D.</li>
+      <li data-task="u-chem">Scroll to <b>Chemistry</b> and look at the compounds listed.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-snp" data-accept="299.*399||399.*299" data-hint="give both positions and changes, e.g. X123Y and X456Z">
+    <div class="q-text">Which two amino-acid changes make up the TLR4*B allele, and what is their reported effect?</div>
+    <div class="q-model"><p><b>Asp299Gly (D299G)</b> and <b>Thr399Ile (T399I)</b>. The allele is associated with a <b>reduced (blunted) response to LPS</b>, e.g. to inhaled LPS.</p></div>
+  </div>
+  <div class="q" data-q="u-myd88" data-accept="myd\W?88" data-hint="look in the Mutagenesis table at position 714">
+    <div class="q-text">Mutating proline 714 abolishes binding to which adaptor protein?</div>
+    <div class="q-model"><p><b>MYD88</b> – P714H abolishes MyD88 binding and the LPS response. The equivalent mutation in mouse TLR4 (Pro712His) is why C3H/HeJ mice do not respond to LPS; it helped identify TLR4 as the LPS receptor (Poltorak <i>et al.</i>, 1998).</p></div>
+  </div>
+  <div class="q" data-q="u-drug">
+    <div class="q-text">Name one compound listed under Chemistry that was developed to block TLR4. What happened to it?</div>
+    <div class="q-model"><p><b>Eritoran</b> (E5564) – a synthetic analogue of lipid A that competes with LPS for MD-2. It reached a phase III trial in severe sepsis (ACCESS) but did not reduce 28-day mortality (Opal <i>et al.</i>, 2013). <b>Resatorvid</b> (TAK-242) instead binds Cys747 inside the cell, in the TIR domain.</p></div>
+  </div>
+
+  <h2 id="up-ptm">1.6 PTM / processing</h2>
+  <p>After translation, proteins are processed and modified. Proteins with an extracellular domain usually lose a <b>signal peptide</b>, and are often <b>glycosylated</b> and stabilised by <b>disulfide bonds</b>.</p>
+  <div class="activity">
+    <div class="act-t">Activity 1.6</div>
+    <ol class="steps">
+      <li data-task="u-ptm" data-auto="uniprot:section name=ptm">Open <b>PTM / Processing</b>. <button class="do showme" type="button" data-uniprot="entry:O00206#ptm">show me</button> Click a green glycosylation pin to see where the sugar is attached in 3D.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-glyc" data-accept="\b10\b||\bten\b" data-hint="count the Glycosylation rows">
+    <div class="q-text">How many N-linked glycosylation sites are annotated?</div>
+    <div class="q-model"><p><b>10</b> (Asn-35, 173, 205, 282, 309, 497, 526, 575, 624 and 630). The PTM note explains that Asn-526 and Asn-575 are needed for TLR4 to reach the cell surface.</p></div>
+  </div>
+  <div class="q" data-q="u-signal">
+    <div class="q-text">Residues 1–23 are a signal peptide. What happens to them, and why might an experimental structure start at residue 24 or later?</div>
+    <div class="q-model"><p>The signal peptide directs TLR4 into the ER for the secretory pathway and is then <b>cleaved off</b>, so it is not part of the mature receptor. Structures are made from the mature protein (often a shorter fragment), so they start after the signal peptide – 3FXI starts at residue 27. UniProt keeps numbering from the precursor's Met-1, and most structures use the same numbers, so residues can be compared directly. But not always: 1CDW numbers TBP 4 lower than UniProt (its Ser155 is UniProt's Ser159). The <code>DBREF</code> line at the top of a PDB file shows how the two numbering schemes line up.</p></div>
+  </div>
+
+  <h2 id="up-expr">1.7 Expression and interactions</h2>
+  <div class="activity">
+    <div class="act-t">Activity 1.7</div>
+    <ol class="steps">
+      <li data-task="u-expr" data-auto="uniprot:section name=expression">Open <b>Expression</b> <button class="do showme" type="button" data-uniprot="entry:O00206#expression">show me</button>. Large proteomics studies are summarised in the Human Protein Atlas (link).</li>
+      <li data-task="u-int" data-auto="uniprot:section name=interaction">Open <b>Interaction</b> <button class="do showme" type="button" data-uniprot="entry:O00206#interaction">show me</button>. Interactions can be shown by experiments on the human protein (a PubMed reference) or inferred from a similar protein in another species (“by similarity”).</li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-cells">
+    <div class="q-text">In which tissues and cells is TLR4 most highly expressed? Why does this make sense for its function?</div>
+    <div class="q-model"><p>Highly expressed in <b>placenta, spleen and peripheral blood leukocytes</b>; detected in <b>monocytes, macrophages, dendritic cells</b> and some T cells. These are innate immune cells that must detect invading bacteria quickly.</p></div>
+  </div>
+  <div class="q" data-q="u-derp2">
+    <div class="q-text"><b>DERP2</b> is listed as an interaction partner. What is it, and why might it bind TLR4?</div>
+    <div class="q-model"><p>Der p 2, a major allergen of the house-dust mite (<i>Dermatophagoides pteronyssinus</i>). It resembles MD-2 in structure and can stand in for it, helping to activate TLR4 – which helps explain why it is such a potent allergen in asthma (Trompette <i>et al.</i>, 2009).</p></div>
+  </div>
+
+  <h2 id="up-family">1.8 Family &amp; domains, and the sequence</h2>
+  <p>Programs that recognise sequence patterns identify <b>domains</b> and <b>repeats</b>. The bar diagram shows where they lie along the protein – a format you can reproduce yourself in PowerPoint. UniProt numbering is the reference system: other numbering schemes (e.g. in PDB files) can be related to it.</p>
+  <div class="activity">
+    <div class="act-t">Activity 1.8</div>
+    <ol class="steps">
+      <li data-task="u-fam" data-auto="uniprot:section name=family">Open <b>Family &amp; Domains</b>. <button class="do showme" type="button" data-uniprot="entry:O00206#family">show me</button></li>
+      <li data-task="u-seq" data-auto="uniprot:section name=sequence">Open <b>Sequence &amp; Isoforms</b>. <button class="do showme" type="button" data-uniprot="entry:O00206#sequence">show me</button> Use <b>Go to residue</b> to check which amino acid is at position 299.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-lrr" data-accept="\b18\b||eighteen" data-hint="count the LRR repeats in the table">
+    <div class="q-text">How many leucine-rich repeats (LRRs) are annotated?</div>
+    <div class="q-model"><p><b>18</b> LRRs (residues 55–565), followed by an LRR C-terminal cap (LRRCT, 579–629). The repeats stack to form the curved ectodomain you will see in 3D.</p></div>
+  </div>
+  <div class="q" data-q="u-tir" data-accept="\btir\b||toll.?interleukin||toll.?il.?1" data-hint="look for the Domain in the cytoplasmic part (after residue 653)">
+    <div class="q-text">Which domain is in the cytoplasmic part of TLR4?</div>
+    <div class="q-model"><p>The <b>TIR</b> (Toll/interleukin-1 receptor) domain, residues 672–815. TIR domains bind the TIR domains of adaptors such as MYD88 and TIRAP.</p></div>
+  </div>
+  <div class="q" data-q="u-len" data-accept="\b839\b" data-hint="see Sequence & Isoforms">
+    <div class="q-text">How many amino acids long is the canonical sequence?</div>
+    <div class="q-model"><p><b>839</b> amino acids (95,680 Da). The entry describes 3 isoforms made by alternative splicing; the canonical one is shown.</p></div>
+  </div>
+
+  <h2 id="up-structure">1.9 Which parts have structures?</h2>
+  <p>The <b>Structure</b> section lists every PDB entry that contains this protein – with method, resolution, chains and the residues covered – and links to the AlphaFold model.</p>
+  <div class="activity">
+    <div class="act-t">Activity 1.9</div>
+    <ol class="steps">
+      <li data-task="u-struct" data-auto="uniprot:section name=structure">Open <b>Structure</b>. <button class="do showme" type="button" data-uniprot="entry:O00206#structure">show me</button> Study the coverage map.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="u-cov">
+    <div class="q-text">Which part of TLR4 has <i>no</i> experimental structure? What could you use instead?</div>
+    <div class="q-model"><p>Every X-ray and cryo-EM structure covers only the <b>extracellular domain</b> (about 23–631); two NMR entries (5NAM, 5NAO) contain short transmembrane fragments. The <b>cytoplasmic TIR domain</b> (672–815) and C-terminal tail have no experimental structure – the <b>AlphaFold</b> model covers the whole sequence (1–839). Chapter 4 looks at how far to trust it.</p></div>
+  </div>
+
+  <div class="optional">
+    <h2 id="up-tbp">Extension: practise on TBP <span class="pill ext">Extension</span></h2>
+    <p>The original version of this tutorial used the transcription factor <b>TATA-box binding protein (TBP)</b>. Use it to practise.</p>
+    <div class="activity">
+      <div class="act-t">Activity 1.10 · TATA-box binding protein</div>
+      <ol class="steps">
+        <li data-task="u-tbp">Search UniProt for <code>TBP</code> <button class="do showme" type="button" data-uniprot="search:TBP">show me</button> and open the human entry.</li>
+        <li data-task="u-tbp-fam" data-auto="uniprot:section acc=P20226 name=family">Open <b>Family &amp; Domains</b> <button class="do showme" type="button" data-uniprot="entry:P20226#family">show me</button>. One program has found two <b>repeats</b> in the sequence (165–241 and 255–332). Another has marked regions of <b>compositional bias</b>: stretches made mostly of one or a few amino acids.</li>
+        <li data-task="u-tbp-seq">In <b>Sequence &amp; Isoforms</b>, type <code>QQQQ</code> in the find box to highlight the long run of Qs – a striking example of biased composition that you can see by eye.</li>
+      </ol>
+    </div>
+    <div class="q" data-q="u-tbp-rep">
+      <div class="q-text">TBP contains two similar repeated regions. What evolutionary event probably produced them?</div>
+      <div class="q-model"><p>A <b>gene duplication</b>: part of an ancestral gene was copied and the two copies fused, so the two halves of TBP's core have similar sequences. In 3D the two repeats fold into the two similar halves of the saddle-shaped core that sits astride the DNA (see 1CDW in the PDB chapter).</p></div>
+    </div>
+    <div class="q" data-q="u-tbp-acc" data-accept="\bp20226\b">
+      <div class="q-text">What is the accession of human TBP?</div>
+      <div class="q-model"><p><b>P20226</b> (TBP_HUMAN).</p></div>
+    </div>
+    <div class="q" data-q="u-tbp-q" data-accept="glutamine||\bgln\b">
+      <div class="q-text">Which amino acid does the long run of Qs represent?</div>
+      <div class="q-model"><p><b>Glutamine</b> (Gln, Q). The canonical sequence has 38 in a row (residues 58–95). Expansion of this poly-Q tract to about 47–63 repeats causes spinocerebellar ataxia 17 (SCA17) – see Disease &amp; Variants.</p></div>
+    </div>
+    <div class="q" data-q="u-tbp-chains" data-accept="\bb\b.*\bf\b.*\bj\b.*\bn\b.*\br\b||bfjnr">
+      <div class="q-text">In the Structure section, which chains of PDB entry 1C9B are TBP?</div>
+      <div class="q-model"><p>Chains <b>B, F, J, N and R</b> (residues 158–337). 1C9B contains five copies of a TBP–TFIIB–DNA complex. By contrast 1CDW has a single TBP (chain A) bound to DNA.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     CHAPTER 2 · THE PDB
+     ===================================================================== -->
+<section class="chapter" id="pdb" data-num="2" data-title="The PDB" data-bench="pdb" hidden>
+  <h1>The Protein Data Bank: experimental structures</h1>
+  <div class="meta-row"><span class="pill time">≈ 10 min</span><span class="pill">Workbench: PDB tab</span></div>
+  <p class="lede">The <b>wwPDB</b> is the worldwide archive of experimentally determined structures of proteins, nucleic acids and their complexes. It has three sites with different tools – <b>RCSB PDB</b> (USA), <b>PDBe</b> (UK) and <b>PDBj</b> (Japan) – but they share the same data. Each entry has a four-character ID such as <code>3FXI</code> (upper or lower case).</p>
+  <div class="callout info">
+    <div class="co-t">Things to check for every entry</div>
+    <ul>
+      <li><b>Method</b> – X-ray crystallography, cryo-electron microscopy (cryo-EM) or NMR.</li>
+      <li><b>Resolution</b> (X-ray and cryo-EM) – a smaller number means finer detail. At ~1.5 Å individual atoms are clear; at ~3 Å you can trace the chain and most side chains; beyond ~4 Å mainly the overall shape.</li>
+      <li><b>What was actually studied</b> – structures are experiments, so they often contain only a fragment of the protein, engineered mutations or fusions, and molecules added to help crystallisation.</li>
+    </ul>
+  </div>
+
+  <h2 id="pdb-3fxi">2.1 Look up 3FXI</h2>
+  <div class="activity">
+    <div class="act-t">Activity 2.1</div>
+    <ol class="steps">
+      <li data-task="p-entry" data-auto="pdb:entry id=3FXI">In the <button class="goto" data-bench="pdb" type="button">PDB tab</button>, search for <code>3FXI</code>. <button class="do showme" type="button" data-pdb="entry:3FXI">show me</button></li>
+      <li data-task="p-read">Read the method, resolution and paper, then the <b>Macromolecules</b> and <b>Small molecules</b> tables.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="p-method" data-type="mcq">
+    <div class="q-text">How was 3FXI determined, and at what resolution?</div>
+    <div class="mcq">
+      <label data-correct data-why="Park et al. (2009) solved it by X-ray crystallography at 3.1 Å."><input type="radio"> X-ray diffraction, 3.1 Å</label>
+      <label data-why="That describes 8WO1, a much newer TLR4 structure."><input type="radio"> Cryo-EM, 2.24 Å</label>
+      <label data-why="NMR entries have no resolution value – and 3FXI is far too large for NMR."><input type="radio"> Solution NMR</label>
+      <label data-why="That is 2Z62, a small TLR4 fragment."><input type="radio"> X-ray diffraction, 1.7 Å</label>
+    </div>
+  </div>
+  <div class="q" data-q="p-copies">
+    <div class="q-text">How many copies of TLR4 and of MD-2 (gene name LY96) does 3FXI contain? What does this tell you about the activated receptor?</div>
+    <div class="q-model"><p>Two of each: TLR4 = chains <b>A, B</b>; MD-2 (lymphocyte antigen 96) = chains <b>C, D</b>. LPS binding brings two TLR4–MD-2 units together into an “m”-shaped 2:2:2 complex. In the cell this dimerisation brings the two cytoplasmic TIR domains together, creating a platform for the adaptors MyD88 and TIRAP.</p></div>
+  </div>
+  <div class="q" data-q="p-pieces">
+    <div class="q-text">LPS appears in pieces: fatty acids (FTT, MYR, DAO), phosphate (PO4) and a branched sugar chain. Why might one ligand be split like this in a PDB entry?</div>
+    <div class="q-model"><p>Every chemical building block in the PDB is described by an entry in its Chemical Component Dictionary. A large, branched molecule like LPS (lipid A + core oligosaccharide) is therefore modelled as several components – glucosamines, phosphates, fatty-acyl chains, Kdo and heptose sugars. Parts that are disordered (e.g. the outer sugars) are not seen at all.</p></div>
+  </div>
+
+  <h2 id="pdb-text">2.2 It's just text!</h2>
+  <p>A structure file is a text file listing every atom with its x, y, z coordinates. The older <b>.pdb</b> format is read by most programs; the newer <b>.cif</b> (mmCIF) format is needed for very large structures.</p>
+  <div class="activity">
+    <div class="act-t">Activity 2.2</div>
+    <ol class="steps">
+      <li data-task="p-file" data-auto="pdb:file">In the 3FXI entry, press <b>Look inside the .pdb file</b>. <button class="do showme" type="button" data-pdb="file:3FXI">show me</button></li>
+      <li data-task="p-cols">In one ATOM line, find the atom name, residue name, chain, residue number, the x/y/z coordinates and the B-factor.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="p-hetatm">
+    <div class="q-text">What is the difference between <code>ATOM</code> and <code>HETATM</code> lines?</div>
+    <div class="q-model"><p><code>ATOM</code> lines are standard amino acids or nucleotides in a polymer chain. <code>HETATM</code> (“hetero atom”) lines are everything else: ligands, ions, water, sugars and modified residues.</p></div>
+  </div>
+  <div class="callout warn">
+    <div class="co-t">Downloading files for other software</div>
+    <p>Use the <b>PDB format</b> / <b>mmCIF</b> buttons in the entry to save a file (e.g. for ICM-Browser, PyMOL or ChimeraX). If you download from a website and the file ends up as <code>3fxi.pdb.txt</code>, your computer has treated it as text: rename it to remove <code>.txt</code> (you may need to turn on “show file extensions” to see it).</p>
+  </div>
+
+  <h2 id="pdb-search">2.3 Search the PDB</h2>
+  <div class="activity">
+    <div class="act-t">Activity 2.3 · Three ways to search</div>
+    <ol class="steps">
+      <li data-task="p-name" data-auto="pdb:search kind=name">Search by <b>protein name</b>: <code>Toll-like receptor 4</code>. <button class="do showme" type="button" data-pdb="search:Toll-like receptor 4" data-mode="name" data-human="false">show me</button> Look at the organisms in the results.</li>
+      <li data-task="p-human" data-auto="pdb:search human=true">Tick <b>Human only</b>. How many are left?</li>
+      <li data-task="p-uniprot" data-auto="pdb:search kind=uniprot">Now search with the UniProt accession <code>O00206</code>. <button class="do showme" type="button" data-pdb="search:O00206" data-mode="uniprot" data-human="false">show me</button></li>
+      <li data-task="p-newest" data-auto="pdb:search sort~release_date">Sort by <b>Newest first</b>. Which method was used for the newest human TLR4 structures?</li>
+    </ol>
+  </div>
+  <div class="q" data-q="p-why-acc">
+    <div class="q-text">Why is searching with the UniProt accession more reliable than searching with a name or free text?</div>
+    <div class="q-model"><p>Names are ambiguous: a name search also finds other species (e.g. mouse TLR4) and related proteins, and free text matches any mention in titles or papers. The accession identifies exactly one protein sequence, and every PDB chain is mapped to UniProt (by the SIFTS project), so the search returns exactly the entries containing human TLR4 – 15 at the time of writing.</p></div>
+  </div>
+  <div class="q" data-q="p-newest-method">
+    <div class="q-text">What method was used for the newest human TLR4 structures, and what did they study?</div>
+    <div class="q-model"><p><b>Cryo-EM</b>: 8WO1 (2.24 Å) and 8WTA (2.9 Å), released in 2024, and 9J03 (2.7 Å, 2025) show human TLR4–MD-2 bound to synthetic lipid A mimetics. Cryo-EM now reaches resolutions that used to need crystals, and is well suited to large membrane-protein complexes. (Newer entries may have appeared since this was written.)</p></div>
+  </div>
+
+  <div class="optional">
+    <h2 id="pdb-tbp">Extension: TBP bound to DNA <span class="pill ext">Extension</span></h2>
+    <div class="activity">
+      <div class="act-t">Activity 2.4 · Refining a search</div>
+      <ol class="steps">
+        <li data-task="p-tbp">Search by protein name for <code>TATA-box-binding protein</code>, then tick <b>Human only</b> and <b>Contains DNA</b>. <button class="do showme" type="button" data-pdb="search:TATA-box-binding protein" data-mode="name" data-human="true" data-dna="true">show me</button></li>
+        <li data-task="p-tbp-cov">Open the coverage map for TBP (UniProt P20226 → Structure). <button class="do showme" type="button" data-uniprot="entry:P20226#structure">show me</button> Careful: the bars show which part of the protein was <i>in the sample</i>, not which part could be seen. Many cryo-EM entries used full-length TBP, so their bars span 1–339, but only the core is visible in their maps – 5IY6, for example, models residues 153–337.</li>
+      </ol>
+    </div>
+    <div class="q" data-q="p-tbp-region">
+      <div class="q-text">Most X-ray structures of TBP contain only residues ~159–339. Why do you think researchers crystallised just this part?</div>
+      <div class="q-model"><p>Residues ~159–339 form the conserved C-terminal core that binds the TATA box. The N-terminal region (with the poly-Q tract) is flexible and disordered, which stops proteins crystallising, so it is usually cut off. Cutting long proteins into stable pieces is a very common strategy – so a complete picture may need several entries (or a prediction).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     CHAPTER 3 · 3D STRUCTURE
+     ===================================================================== -->
+<section class="chapter" id="viewer" data-num="3" data-title="3D structure" data-bench="viewer" hidden>
+  <h1>Exploring TLR4–MD-2–LPS in 3D</h1>
+  <div class="meta-row"><span class="pill time">≈ 30 min</span><span class="pill">Workbench: 3D viewer</span></div>
+  <p class="lede">A <b>molecular graphics</b> program turns the coordinates in a structure file into a picture you can explore. Here you will do in the browser everything the ICM-Browser worksheet did: change styles and colours, select parts of the molecule, look at a binding site, measure, label and save views.</p>
+
+  <h2 id="v-layout">3.1 The layout</h2>
+  <table class="table">
+    <tr><th>Part of the viewer</th><th>What it does</th><th>ICM-Browser equivalent</th></tr>
+    <tr><td><b>Load bar</b> (top)</td><td>Load a PDB entry, an AlphaFold model or your own file</td><td>PDB search box · File › Open</td></tr>
+    <tr><td><b>Tabs</b>: Display, Colour, Select, Labels &amp; key, Measure, Views, Save image</td><td>Change how the selection looks, and make pictures</td><td>display / labels tabs</td></tr>
+    <tr><td><b>Selection bar</b> (green when something is selected)</td><td>Tells you what the buttons will change</td><td>“no selection” box</td></tr>
+    <tr><td><b>Workspace</b> (left)</td><td>Chains and ligands, with eye icons to show/hide</td><td>Workspace panel</td></tr>
+    <tr><td><b>Sequence bar</b></td><td>Sequence of one chain – drag along it to select</td><td>“+” next to a chain</td></tr>
+    <tr><td><b>Command line</b> (bottom)</td><td>Every button is written here as a command; you can type commands too</td><td>Terminal</td></tr>
+  </table>
+
+  <div class="activity">
+    <div class="act-t">Activity 3.1 · What is in 3FXI?</div>
+    <ol class="steps">
+      <li data-task="v-load" data-check="loaded:3FXI">Load <code>3FXI</code> if it is not already loaded. <button class="do showme" type="button" data-cmd="load 3fxi">show me</button></li>
+      <li data-task="v-ws">Look at the <b>Workspace</b>: chains A–D, <b>LPS</b> and <b>LPS*</b>, N-glycans, magnesium ions and water (hidden). Hover over each part of the molecule to check which is which.</li>
+      <li data-task="v-lps-pieces">Press <b>▸</b> next to <b>LPS</b> to list its pieces: glucosamines (<code>PA1</code>, <code>GCS</code>), phosphates (<code>PO4</code>), fatty-acyl chains (<code>FTT</code>, <code>DAO</code>, <code>MYR</code>) and core sugars (<code>KDO</code>, <code>GMH</code>). Click one, e.g. <code>FTT A1003</code>, to select it and see what that part of LPS looks like.</li>
+    </ol>
+  </div>
+  <p class="hint">Chain letters of LPS: in the file, the fatty-acyl chains and phosphates of LPS are labelled chain <b>A</b> and its sugars chain <b>E</b> (B and H for LPS*), even though LPS sits in MD-2 (chain C). The Workspace gathers the pieces for you as LPS and LPS*, but commands and interaction labels use the file's letters – e.g. <code>A:1010</code> is one of LPS's phosphates.</p>
+  <div class="q" data-q="v-chains" data-type="mcq">
+    <div class="q-text">Which chains are TLR4 and which are MD-2?</div>
+    <div class="mcq">
+      <label data-correct data-why="Chains A and B are TLR4 (601 residues each); C and D are MD-2 (140 residues each)."><input type="radio"> A and B are TLR4; C and D are MD-2</label>
+      <label data-why="Chains C and D are much shorter (140 residues) – that is MD-2. Hover over each chain, or read the names in the Workspace."><input type="radio"> A and C are TLR4; B and D are MD-2</label>
+      <label data-why="LPS is not a protein chain: it is listed separately in the Workspace as LPS and LPS*. Chain B is the second copy of TLR4 (TLR4*)."><input type="radio"> A is TLR4, B is MD-2, and C and D are LPS</label>
+    </div>
+  </div>
+
+  <h2 id="v-seq">3.2 Sequence and structure</h2>
+  <div class="activity">
+    <div class="act-t">Activity 3.2</div>
+    <ol class="steps">
+      <li data-task="v-seqsel" data-auto="viewer:seqselect">The sequence bar shows chain A. Drag along the letters from residue 27 to about 100: those residues are marked with green dots in 3D. (Press ▸ next to another chain in the Workspace to show its sequence.)</li>
+      <li data-task="v-seqgap">Scroll to the end of the sequence. Chain A stops at Cys627, although the protein used in the experiment went on to Lys631: those last residues were too disordered to be seen, so they were not modelled. (Gaps <i>inside</i> a chain are shown as a red <b>⋯</b> – you will see some in 4KXF in Activity 3.9.)</li>
+      <li data-task="v-esc">Press <span class="kbd">Esc</span> (or <b>Clear selection</b>) to clear the selection.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="v-start27">
+    <div class="q-text">Chain A starts at residue 27, not residue 1. Why?</div>
+    <div class="q-model"><p>The protein made for crystallisation was only the ectodomain, without the signal peptide (1–23) – structures often contain only part of a protein. The residue numbers match UniProt, which makes comparison easy. Residues 628–631 were in the protein but disordered, so they could not be modelled.</p></div>
+  </div>
+
+  <h2 id="v-copies">3.3 One unit or two?</h2>
+  <p>3FXI contains <b>two</b> TLR4–MD-2–LPS units. Following the paper, the second copy is marked with an asterisk: TLR4* (chain B), MD-2* (chain D) and LPS*.</p>
+  <div class="activity">
+    <div class="act-t">Activity 3.3 · Show only one unit</div>
+    <ol class="steps">
+      <li data-task="v-hide" data-check="oneCopy3FXI">Use the <b>eye</b> icons in the Workspace to hide chains <b>B</b> and <b>D</b> and <b>LPS*</b>. (Their sugars and ion are hidden with them.) <button class="do showme" type="button" data-cmd="undisplay B or D or LPS*">show me</button></li>
+      <li data-task="v-center">Click <b>TLR4 (chain A)</b> in the Workspace to select it, then press <span class="kbd">⌖</span> (centre on selection) at the top right of the viewer.</li>
+      <li data-task="v-showall">Bring the second unit back with the eye icons (or <b>Display › Show all</b>).</li>
+    </ol>
+  </div>
+  <div class="q" data-q="v-dimer">
+    <div class="q-text">Why is it important that LPS brings two TLR4–MD-2 units together?</div>
+    <div class="q-model"><p>Dimerisation is the activation step: it brings the two cytoplasmic TIR domains close together (they are not in the crystal), creating a platform that recruits the TIR-containing adaptors (TIRAP/MyD88, TRAM/TRIF) and starts signalling to NF-κB. Each LPS directly bridges the two units.</p></div>
+  </div>
+
+  <h2 id="v-styles">3.4 Display styles</h2>
+  <p>Styles apply to the <b>current selection</b> – or to everything if nothing is selected. Click a style once to add it, and again to remove it. The lecture's three basic styles are <b>cartoon</b> (the fold), <b>sticks</b> (bonds) and <b>spheres</b> (atoms at their real size).</p>
+  <div class="activity">
+    <div class="act-t">Activity 3.4 · Try each style</div>
+    <ol class="steps">
+      <li data-task="v-mdsurf" data-check="md2Surface">Select <b>MD-2 (chain C)</b> in the Workspace, then in the <button class="goto" data-vtab="display" type="button">Display tab</button> press <b>Surface</b> and then <b>See-through</b>. <button class="do showme" type="button" data-cmd="select C; show glass C">show me</button></li>
+      <li data-task="v-lps" data-check="lpsSpheres">Select <b>LPS</b> and press <b>Spheres</b> to see how LPS fills MD-2's pocket. <button class="do showme" type="button" data-cmd="select LPS; show spheres LPS">show me</button></li>
+      <li data-task="v-lines">Try <b>Lines</b>, <b>Ball &amp; stick</b> and <b>Tube</b> on part of TLR4. Use <b>No style</b> to remove all styles from the selection.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="v-style-q" data-type="mcq">
+    <div class="q-text">You want to show exactly which atoms of LPS make hydrogen bonds with TLR4. Which style is best?</div>
+    <div class="mcq">
+      <label data-correct data-why="Sticks show every bond and atom, so you can see (and measure) individual contacts."><input type="radio"> Sticks</label>
+      <label data-why="Cartoon shows only the backbone fold – no side-chain atoms."><input type="radio"> Cartoon</label>
+      <label data-why="Spheres show size and packing, but atoms hide one another."><input type="radio"> Spheres</label>
+      <label data-why="A surface hides the atoms underneath."><input type="radio"> Surface</label>
+    </div>
+  </div>
+
+  <h2 id="v-colours">3.5 Colour schemes</h2>
+  <div class="activity">
+    <div class="act-t">Activity 3.5 · Colour with a purpose</div>
+    <ol class="steps">
+      <li data-task="v-rainbow" data-auto="viewer:color scheme=rainbow">Select <b>TLR4 (chain A)</b> and choose <b>Rainbow N→C</b> in the <button class="goto" data-vtab="colour" type="button">Colour tab</button>: the chain runs blue (N-terminus) → red (C-terminus). <button class="do showme" type="button" data-cmd="color rainbow A">show me</button></li>
+      <li data-task="v-ss" data-auto="viewer:color scheme=ss">Now choose <b>Secondary structure</b>. <button class="do showme" type="button" data-cmd="color ss A">show me</button></li>
+      <li data-task="v-hyd" data-auto="viewer:color scheme=hydrophobicity">Select <b>MD-2 (chain C)</b> (still a see-through surface) and choose <b>Hydrophobicity</b>. Show LPS as sticks inside it. <button class="do showme" type="button" data-cmd="color hydrophobicity C; hide spheres LPS; show sticks LPS; center LPS">show me</button></li>
+    </ol>
+  </div>
+  <div class="q" data-q="v-ss-q">
+    <div class="q-text">Which secondary structure dominates TLR4, and where is it?</div>
+    <div class="q-model"><p><b>β-strands.</b> Each leucine-rich repeat contributes one short strand, and together they form a continuous parallel β-sheet lining the <b>concave</b> (inner) face of the curved “horseshoe”. The convex outer face is mostly loops with a few short helices. MD-2 binds on the concave side.</p></div>
+  </div>
+  <div class="q" data-q="v-hyd-q">
+    <div class="q-text">What kind of residues line MD-2's pocket, and why does that suit LPS?</div>
+    <div class="q-model"><p>Mainly <b>hydrophobic</b> residues (orange: Ile, Leu, Phe, Val…). They pack against the fatty-acyl chains of lipid A, which are hydrophobic. The polar phosphates and sugars stay at the mouth of the pocket, near polar and positively charged residues.</p></div>
+  </div>
+
+  <h2 id="v-site">3.6 The LPS binding site</h2>
+  <div class="callout pharm">
+    <div class="co-t">Pharmacology link</div>
+    <p>How a ligand binds – which residues it touches, and whether through hydrogen bonds, salt bridges or hydrophobic contacts – is the starting point for designing drugs that mimic or block it.</p>
+  </div>
+  <div class="activity">
+    <div class="act-t">Activity 3.6 · Binding-site analysis</div>
+    <ol class="steps">
+      <li data-task="v-site" data-auto="viewer:site">Click <b>LPS</b> in the Workspace to select it. In the <button class="goto" data-vtab="select" type="button">Select tab</button> press <b>Binding site</b>. Residues within 4.5 Å appear as sticks, and dashed lines show <span style="color:#2B83BA;font-weight:700">hydrogen bonds</span> and <span style="color:#b39200;font-weight:700">salt bridges</span>. <button class="do showme" type="button" data-cmd="site LPS 4.5">show me</button></li>
+      <li data-task="v-hoverbond">Hover over a dashed line to read which atoms it joins. Use the list of residue buttons to jump between them.</li>
+      <li data-task="v-labels3" data-check="threeLabels">Select three residues that contact the phosphates or sugars (click them) and press <b>Label residues</b> in the <button class="goto" data-vtab="labels" type="button">Labels &amp; key tab</button>. <button class="do showme" type="button" data-cmd="select A:264 or A:341 or C:122; label sele">show me</button></li>
+    </ol>
+  </div>
+  <div class="q" data-q="v-lps-parts">
+    <div class="q-text">Which part of LPS is buried inside MD-2, and which parts contact TLR4?</div>
+    <div class="q-model"><p>Five of the six <b>fatty-acyl (lipid) chains</b> of lipid A are buried in MD-2's hydrophobic pocket. The sixth chain sticks out of MD-2 and packs against conserved phenylalanines of the <i>second</i> TLR4 (TLR4*), and the <b>phosphates</b> and core <b>sugars</b> form ionic and hydrogen-bond contacts with positively charged and polar residues of TLR4 and MD-2 (Park <i>et al.</i>, 2009). This is how LPS bridges the two units.</p></div>
+  </div>
+  <div class="q" data-q="v-contacts">
+    <div class="q-text">List three residues that make polar contacts (hydrogen bonds or salt bridges) with LPS, with their chain.</div>
+    <div class="q-model"><p>For example: TLR4 (chain A) <b>Arg264, Asp294, Tyr296, Lys341</b>; MD-2 (chain C) <b>Ser118, Ser120, Lys122</b>. Across the dimer interface, TLR4* (chain B) <b>Gln436</b> hydrogen-bonds the exposed acyl chain of LPS. Exact lists depend on the distance cut-off used.</p></div>
+  </div>
+
+  <h2 id="v-box">3.7 Box selection and measuring</h2>
+  <div class="activity">
+    <div class="act-t">Activity 3.7</div>
+    <ol class="steps">
+      <li data-task="v-boxsel" data-auto="viewer:boxselect">In the <button class="goto" data-vtab="select" type="button">Select tab</button>, press <b>Box select</b> and drag a rectangle around part of the molecule (like ICM's manual selection). Colour the selection or change its style, then press <span class="kbd">Esc</span>.</li>
+      <li data-task="v-measure" data-auto="viewer:measure">In the <button class="goto" data-vtab="measure" type="button">Measure tab</button>, press <b>Measure distance</b> and click two atoms – e.g. the NE nitrogen of Arg264 and oxygen O3 of the phosphate next to it (<code>A:1010</code>), or the NZ nitrogen at the tip of Lys341 and an oxygen of the Kdo sugar it touches. <button class="do showme" type="button" data-cmd="distance A:264.NE A:1010.O3">show me</button></li>
+    </ol>
+  </div>
+  <div class="q" data-q="v-dist">
+    <div class="q-text">What distance did you measure, and between which atoms? Is it close enough for a hydrogen bond or salt bridge?</div>
+    <div class="q-model"><p>For example Arg264 NE to phosphate O3 is about <b>3.3 Å</b>. Hydrogen bonds and salt bridges are typically 2.6–3.5 Å between the heavy (non-hydrogen) atoms, so this is a genuine interaction. Note that X-ray structures usually do not show hydrogen atoms.</p></div>
+  </div>
+
+  <h2 id="v-labels">3.8 Labels and saved views</h2>
+  <p><b>3D labels</b> stay attached to their residue when you rotate; <b>2D text</b> stays fixed on the screen (like a title). <b>Saved views</b> work like ICM's slides: they remember the orientation, styles, colours and labels.</p>
+  <div class="activity">
+    <div class="act-t">Activity 3.8</div>
+    <ol class="steps">
+      <li data-task="v-2d" data-check="label2d">In the <button class="goto" data-vtab="labels" type="button">Labels &amp; key tab</button>, add a <b>2D text</b> title. Rotate the molecule and watch the 3D labels move while the title stays put. Drag labels to move them; double-click to edit.</li>
+      <li data-task="v-views" data-check="twoViews">In the <button class="goto" data-vtab="views" type="button">Views tab</button>, save a view, rotate to a new orientation, and save another. Click the thumbnails to switch between them.</li>
+    </ol>
+  </div>
+
+  <h2 id="v-4kxf">3.9 Many copies: 4KXF</h2>
+  <p>Some entries load with many copies of the same protein because of how the protein packed in the crystal.</p>
+  <div class="activity">
+    <div class="act-t">Activity 3.9 · Remove extra copies</div>
+    <ol class="steps">
+      <li data-task="v-4kxf" data-check="loaded:4KXF">Load <code>4KXF</code> (the immune sensor NLRC4). <button class="do showme" type="button" data-cmd="load 4kxf; disable 3FXI">show me</button> Hide 3FXI with its eye icon if both are shown.</li>
+      <li data-task="v-4kxf-one" data-check="oneCopy4KXF">Leave just one copy visible: select one chain and press <b>Display › Show only</b>, or use the eye icons. <button class="do showme" type="button" data-cmd="isolate 4KXF B; center 4KXF B">show me</button></li>
+      <li data-task="v-4kxf-rm">When finished, remove 4KXF (Workspace › ⋯ › Remove) and show 3FXI again. <button class="do showme" type="button" data-cmd="remove 4KXF; enable 3FXI; showall; reset">show me</button></li>
+    </ol>
+  </div>
+  <div class="q" data-q="v-4kxf-q">
+    <div class="q-text">4KXF contains eight copies of NLRC4. Is NLRC4 an octamer? How would you check?</div>
+    <div class="q-model"><p>No. The <b>asymmetric unit</b> of the crystal just happened to contain eight molecules (crystal packing). The <b>biological assembly</b> defined by the authors is a <b>monomer</b> – check the “Biological assemblies” section of the entry in the PDB tab. Contacts between copies in a crystal are not necessarily biological.</p></div>
+  </div>
+
+  <div class="optional">
+    <h2 id="v-eritoran">Extension: an agonist and an antagonist <span class="pill ext">Extension</span></h2>
+    <p><b>2Z65</b> is MD-2 bound to <b>eritoran</b>, the lipid A analogue that went to phase III trials. To help it crystallise, the TLR4 in this entry is a <i>hybrid</i>: its N-terminal part fused to a hagfish protein (VLR).</p>
+    <div class="activity">
+      <div class="act-t">Activity 3.10 · LPS vs eritoran</div>
+      <ol class="steps">
+        <li data-task="v-2z65" data-check="loaded:2Z65">Load <code>2Z65</code> as well as 3FXI. <button class="do showme" type="button" data-cmd="load 2z65">show me</button></li>
+        <li data-task="v-sup-er" data-check="eritoranSuperposed">Superpose the MD-2 of 2Z65 onto the MD-2 of 3FXI: <button class="do showme" type="button" data-cmd="superpose 2Z65:C onto 3FXI:C">superpose</button> The RMSD is shown in the message.</li>
+        <li data-task="v-er-view">Show just the two MD-2s with their ligands: <button class="do showme" type="button" data-cmd="labels clear; isolate 3FXI C or LPS; display 2Z65 C or eritoran; only sticks 2Z65 eritoran; only sticks 3FXI LPS; show glass 3FXI C; center 3FXI LPS">show me</button></li>
+      </ol>
+    </div>
+    <div class="q" data-q="v-eritoran">
+      <div class="q-text">Compare eritoran (magenta) with lipid A. How many lipid chains does each have, and why might eritoran block TLR4 rather than activate it?</div>
+      <div class="q-model"><p>Eritoran has <b>four</b> lipid chains, all buried in MD-2's pocket. <i>E. coli</i> lipid A has <b>six</b>: the extra chains push the phosphorylated glucosamine backbone ~5 Å out towards the solvent, so one lipid chain and the phosphates can contact the second TLR4 and drive dimerisation. Eritoran fills the pocket (competing with LPS) but cannot make this bridge, so no dimer forms and there is no signal – it is an antagonist.</p></div>
+    </div>
+
+    <h2 id="v-snp">Extension: where are the TLR4*B variants? <span class="pill ext">Extension</span></h2>
+    <div class="activity">
+      <div class="act-t">Activity 3.11</div>
+      <ol class="steps">
+        <li data-task="v-snp-find">Find Asp299 and Thr399 in 3FXI chain A: <button class="do showme" type="button" data-cmd="labels clear; isolate 3FXI A or C or LPS or LPS*; select 3FXI A:299 or A:399; show spheres sele; color magenta sele; label sele; center 3FXI A">show me</button> LPS* is shown too, because part of it touches chain A across the dimer interface. Measure from each residue to the nearest atom of LPS and of LPS*.</li>
+      </ol>
+    </div>
+    <div class="q" data-q="v-snp-q">
+      <div class="q-text">Are Asp299 and Thr399 close to LPS? What might this suggest about how they reduce the LPS response?</div>
+      <div class="q-model"><p>No. Asp299 is about <b>14 Å</b> from LPS, and Thr399 about <b>15 Å</b> from LPS* (the other unit's LPS), so neither touches a ligand directly. The crystal structure of the variant receptor (4G8A; Ohto <i>et al.</i>, 2012) still forms the normal “m”-shaped complex with LPS, with only local changes near residue 299 that alter the surface of TLR4. Their effect is therefore subtle, not a blocked binding site.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     CHAPTER 4 · ALPHAFOLD
+     ===================================================================== -->
+<section class="chapter" id="alphafold" data-num="4" data-title="AlphaFold" data-bench="viewer" hidden>
+  <h1>AlphaFold: predicted structures</h1>
+  <div class="meta-row"><span class="pill time">≈ 15 min</span><span class="pill">Workbench: 3D viewer</span></div>
+  <p class="lede"><b>AlphaFold2</b> (Google DeepMind) predicts a protein's 3D structure from its sequence. It is a neural network trained on structures from the <b>PDB</b> and on evolutionarily related sequences from <b>UniProt</b> – so its success rests on fifty years of experimental work. The <b>AlphaFold Protein Structure Database</b> (<a href="https://alphafold.ebi.ac.uk" target="_blank" rel="noopener">alphafold.ebi.ac.uk</a>, run with EMBL-EBI) holds predictions for over 214 million proteins.</p>
+  <div class="callout info">
+    <div class="co-t">Two confidence scores</div>
+    <ul>
+      <li><b>pLDDT</b> (0–100) – confidence in each residue's local structure. Dark blue &gt; 90 very high · light blue 70–90 confident · yellow 50–70 low · orange &lt; 50 very low (often disordered).</li>
+      <li><b>PAE</b> (predicted aligned error, in Å) – confidence in the <i>relative</i> position of two residues. Low PAE between two domains means their arrangement is reliable; high PAE means it is not.</li>
+    </ul>
+    <p>A prediction is a model, not an experiment: AlphaFold DB models are single chains, without partners, ligands, ions or sugars.</p>
+  </div>
+
+  <h2 id="af-load">4.1 The TLR4 model</h2>
+  <div class="activity">
+    <div class="act-t">Activity 4.1</div>
+    <ol class="steps">
+      <li data-task="af-load" data-check="loaded:alphafold">Load the AlphaFold model of TLR4: type <code>O00206</code> in the <b>AlphaFold</b> box of the viewer and press <b>Load model</b>. <button class="do showme" type="button" data-cmd="load af O00206; center AF-O00206-F1">show me</button></li>
+      <li data-task="af-panel">The model is coloured by pLDDT, and the <b>AlphaFold confidence</b> panel (top right) summarises it. Open <b>pLDDT along the sequence</b> in the panel.</li>
+    </ol>
+  </div>
+  <p class="hint">Need the model file for other software (ICM-Browser, PyMOL, ChimeraX…)? Use the <b>.pdb file</b> button in the <button class="goto" data-vtab="export" type="button">Save image tab</button>, or download it from the model's page on <a href="https://alphafold.ebi.ac.uk/entry/O00206" target="_blank" rel="noopener">AlphaFold DB</a>. UniProt's Structure section links to the same page.</p>
+  <div class="q" data-q="af-mean" data-accept="\b8[89](\.\d+)?\b" data-hint="read it from the AlphaFold confidence panel">
+    <div class="q-text">What is the mean pLDDT of the model?</div>
+    <div class="q-model"><p>About <b>89</b> (89.2). Around 71% of residues are “very high” confidence.</p></div>
+  </div>
+  <div class="q" data-q="af-low">
+    <div class="q-text">Which regions have very low confidence (orange)? Suggest a reason for each.</div>
+    <div class="q-model"><p>The <b>N-terminus (≈1–25)</b> – the signal peptide, which is cleaved off and has no fixed structure; and the <b>C-terminal tail (≈821–839)</b>, which is flexible. The linker between the membrane helix and the TIR domain (≈655–672) is also low. Very low pLDDT usually indicates flexible or intrinsically disordered regions rather than a “wrong” structure.</p></div>
+  </div>
+
+  <h2 id="af-whole">4.2 A complete receptor – almost</h2>
+  <div class="activity">
+    <div class="act-t">Activity 4.2</div>
+    <ol class="steps">
+      <li data-task="af-domains">Rotate the model: you can see the LRR ectodomain, the single transmembrane helix and the cytoplasmic TIR domain – everything in one chain.</li>
+      <li data-task="af-tir" data-auto="uniprot:show3d label~tir">In the UniProt entry, open <b>Family &amp; Domains</b> and click the <b>TIR</b> domain to highlight it on the model. <button class="do showme" type="button" data-uniprot="show3d:O00206|672-815|TIR domain">show me</button></li>
+      <li data-task="af-cys747">Resatorvid (TAK-242) binds <b>Cys747</b>. Find it: <button class="do showme" type="button" data-cmd="select AF-O00206-F1 A:747; show spheres sele; label sele; center sele">show me</button> Hover over it to read its pLDDT.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="af-orient">
+    <div class="q-text">The TIR domain has high confidence, but look at where it sits relative to the ectodomain. Could it be arranged like that in a cell?</div>
+    <div class="q-model"><p>No. In a cell the ectodomain is outside and the TIR domain is in the cytoplasm, on opposite sides of the membrane, with the helix crossing the ~4 nm lipid bilayer. AlphaFold has no membrane, so the relative orientation of the domains is essentially arbitrary – the PAE plot (next) confirms that it is not predicted with any confidence.</p></div>
+  </div>
+
+  <h2 id="af-pae">4.3 The PAE plot</h2>
+  <div class="activity">
+    <div class="act-t">Activity 4.3</div>
+    <ol class="steps">
+      <li data-task="af-pae" data-auto="af:pae-open||af:pae">In the confidence panel, open <b>Predicted aligned error (PAE) plot</b>. Dark green = low expected error; white = high.</li>
+      <li data-task="af-pae-box" data-auto="af:pae-select">Two dark squares lie along the diagonal – the ectodomain and the TIR domain. Drag a box over the pale area <i>between</i> them (x ≈ 670–815, y ≈ 30–620). The residues are selected and the mean PAE is shown.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="af-pae-q">
+    <div class="q-text">What does the PAE tell you about how the ectodomain and TIR domain are arranged in this model?</div>
+    <div class="q-model"><p>The expected error between them is about <b>27 Å</b> – close to the maximum (~32 Å) – so AlphaFold cannot tell how the two domains sit relative to each other. Within each domain the PAE is low (~5 Å), so each fold is reliable on its own. Interpret domains separately, not their arrangement.</p></div>
+  </div>
+
+  <h2 id="af-compare">4.4 Prediction versus experiment</h2>
+  <div class="activity">
+    <div class="act-t">Activity 4.4</div>
+    <ol class="steps">
+      <li data-task="af-both" data-check="loaded:3FXI">Make sure 3FXI is loaded too. <button class="do showme" type="button" data-cmd="load 3fxi">show me</button></li>
+      <li data-task="af-sup" data-check="afAndPdbSuperposed">Superpose the model on the crystal structure – press <b>Superpose onto…</b> in the confidence panel, or <button class="do showme" type="button" data-cmd="superpose AF-O00206-F1:A onto 3FXI:A">superpose</button></li>
+      <li data-task="af-compare-view">Colour 3FXI chain A grey and hide chains B and D, to compare. <button class="do showme" type="button" data-cmd="color lightgrey 3FXI A; undisplay 3FXI B or D or LPS*; reset">show me</button></li>
+    </ol>
+  </div>
+  <div class="q" data-q="af-rmsd" data-accept="(^|[^\d.])0?\.[5-9]\d*(?!\d|\.\d)||(^|[^\d,])0,[5-9]\d*(?!\d)" data-hint="the RMSD (in Å) is shown in the message after superposing">
+    <div class="q-text">What RMSD did you get (in Å)?</div>
+    <div class="q-model"><p>About <b>0.7 Å</b> over ~590 Cα atoms – an excellent match (differences below ~1–2 Å are similar to the differences between two crystal structures of the same protein). The prediction of the ectodomain is essentially as good as the experiment. One caveat: 3FXI (released in 2009) was among the structures AlphaFold2 was trained on, so this is not a fully independent test.</p></div>
+  </div>
+  <div class="q" data-q="af-missing">
+    <div class="q-text">What does the AlphaFold model <i>not</i> show that 3FXI does? Why does this matter when thinking about drugs?</div>
+    <div class="q-model"><p>No <b>MD-2</b> partner, no <b>LPS</b> (or any ligand), no second TLR4 (the <b>dimer</b>), no <b>glycans</b>, ions or water. The LPS-binding pocket is in MD-2, so a drug-design project using only the TLR4 model would miss the binding site. Ligands and partners can also change a protein's shape. Complexes need experiments or newer tools that model complexes and ligands (e.g. AlphaFold3).</p></div>
+  </div>
+  <div class="q" data-q="af-trust" data-type="mcq">
+    <div class="q-text">A residue in a model has pLDDT 45. Which statement is best?</div>
+    <div class="mcq">
+      <label data-why="Low pLDDT means low confidence even in the backbone, never mind side chains."><input type="radio"> Its side-chain position is accurate to about 1 Å</label>
+      <label data-correct data-why="Very low pLDDT regions are usually flexible or disordered – do not interpret their exact positions."><input type="radio"> This region is probably flexible or disordered – don't interpret its position</label>
+      <label data-why="pLDDT does not tell you whether a residue is buried."><input type="radio"> The residue is buried in the protein core</label>
+    </div>
+  </div>
+
+  <div class="optional">
+    <h2 id="af-tbp">Extension: TBP <span class="pill ext">Extension</span></h2>
+    <div class="activity">
+      <div class="act-t">Activity 4.5</div>
+      <ol class="steps">
+        <li data-task="af-tbp">Load the AlphaFold model of TBP: <button class="do showme" type="button" data-cmd="load af P20226; isolate AF-P20226-F1; center AF-P20226-F1">show me</button> Compare its confidence with the TBP coverage map from Chapter 2.</li>
+      </ol>
+    </div>
+    <div class="q" data-q="af-tbp-q">
+      <div class="q-text">Which part of TBP is predicted confidently, and which is not? How does this match the experimental structures?</div>
+      <div class="q-model"><p>The C-terminal core (≈160–339), which binds DNA, has very high confidence (mean pLDDT ≈ 96) – the same part seen in the X-ray structures. Most of the N-terminal region (≈1–57 and 96–159) has low or very low pLDDT: it is disordered, which is why it is cut off before crystallisation.</p><p>The poly-Q tract (58–95) is the surprise: AlphaFold builds it as one long helix with “confident” pLDDT (≈ 80). But the PAE between this helix and the core is ≈ 28 Å, so its position relative to the core is unknown, and no experimental structure shows the helix. Treat confident-looking helices in repetitive sequence with caution.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     CHAPTER 5 · MAKE A FIGURE
+     ===================================================================== -->
+<section class="chapter" id="figure" data-num="5" data-title="Make a figure" data-bench="viewer" hidden>
+  <h1>Make a labelled figure</h1>
+  <div class="meta-row"><span class="pill time">≈ 10 min</span><span class="pill">Workbench: 3D viewer</span></div>
+  <p class="lede">Your coursework asks for a 3D view of your receptor, <b>labelled</b>, with a <b>clear colour code and key</b>. Labels help a reader understand the picture without having to read the legend. Here you will recreate the classic picture of the TLR4–MD-2–LPS dimer.</p>
+
+  <div class="callout info">
+    <div class="co-t">What makes a good molecular figure</div>
+    <ul>
+      <li><b>One message.</b> Decide what the picture should show (the overall fold? the binding site?) and hide everything else – extra copies, water, clutter.</li>
+      <li><b>Few, meaningful colours</b> – e.g. one colour per molecule – and a <b>key</b> that explains every colour.</li>
+      <li><b>Labels</b> on the important parts only, with leader lines where needed.</li>
+      <li><b>Orientation</b> that shows the feature clearly (save it as a view).</li>
+      <li><b>White background and high resolution</b> for reports (2× or more).</li>
+      <li>A <b>figure legend</b> that gives the PDB ID and reference, what each colour means, and the software used.</li>
+    </ul>
+  </div>
+
+  <div class="activity">
+    <div class="act-t">Activity 5.1 · Build the figure</div>
+    <ol class="steps">
+      <li data-task="f-start" data-auto="viewer:loaded id=3FXI">Start afresh with 3FXI. <button class="do showme" type="button" data-cmd="clear; load 3fxi; undisplay glycans">show me</button></li>
+      <li data-task="f-colours" data-auto="viewer:color scheme=uniform">Give each molecule its own colour: select a chain in the Workspace and click a colour in the <button class="goto" data-vtab="colour" type="button">Colour tab</button>. Show LPS and LPS* as sticks. <button class="do showme" type="button" data-cmd="color #1f5fbf A; color #7fb3e0 B; color #2ca02c C; color #a6d854 D; only sticks LPS or LPS*; color red LPS or LPS*; select none">show me</button></li>
+      <li data-task="f-orient">Rotate until you can see the “m” shape clearly – a side view with the ends that lead into the membrane at the bottom – then save it in <b>Views</b>. <button class="do showme" type="button" data-cmd="orient dimer">show me</button></li>
+      <li data-task="f-key" data-check="keyShown">In <button class="goto" data-vtab="labels" type="button">Labels &amp; key</button>, press <b>Colour key</b>. Double-click the entries to rename them (e.g. “TLR4”, “TLR4*”). Drag the key to a corner. <button class="do showme" type="button" data-cmd="key auto">show me</button></li>
+      <li data-task="f-labels" data-check="threeLabels">Add 3D labels: select each molecule and press <b>3D text…</b> (or <b>Label residues</b>) – TLR4, MD-2, LPS and the starred copies. <button class="do showme" type="button" data-cmd="label3d &quot;TLR4&quot; A; label3d &quot;TLR4*&quot; B; label3d &quot;MD-2&quot; C; label3d &quot;MD-2*&quot; D; label3d &quot;LPS&quot; LPS; label3d &quot;LPS*&quot; LPS*">show me</button></li>
+      <li data-task="f-title" data-check="label2d">Add a 2D title.</li>
+      <li data-task="f-export" data-auto="viewer:export">In <button class="goto" data-vtab="export" type="button">Save image</button>, download a PNG at 2× (or copy it straight into Word or PowerPoint).</li>
+      <li data-task="f-session" data-auto="viewer:session-saved">In <b>Views</b>, press <b>Save session</b> so you can carry on later (open it again with <b>Open session</b>).</li>
+    </ol>
+  </div>
+
+  <h2 id="f-schematic">Schematics</h2>
+  <p>A schematic can show what the structure cannot. 3FXI contains only the extracellular part of the receptor; you can indicate the rest with simple shapes.</p>
+  <div class="activity">
+    <div class="act-t">Activity 5.2 · Add a schematic <span class="pill ext">optional</span></div>
+    <ol class="steps">
+      <li data-task="f-shapes" data-auto="viewer:shape">With the complex in the side view (<button class="do showme" type="button" data-cmd="orient dimer">side view</button>), use <b>Box</b> to draw the plasma membrane below the ectodomains, and <b>Ellipse</b> to draw the two TIR domains inside the cell. Label them with 2D text (“plasma membrane”, “TIR domains – not in 3FXI”) and add <b>Arrows</b> if useful.</li>
+    </ol>
+  </div>
+  <p class="hint">Prefer PowerPoint? Export the PNG and add labels and shapes there with the text and drawing tools – that is how the original tutorial did it. Either way is fine.</p>
+
+  <h2 id="f-legend">Writing the figure legend</h2>
+  <div class="callout lecture">
+    <div class="co-t">Example legend</div>
+    <p><b>Figure 1. Structure of the human TLR4–MD-2–LPS complex.</b> Crystal structure (PDB 3FXI; Park <i>et al.</i>, 2009) viewed from the side, with the membrane-proximal ends at the bottom. TLR4 (dark blue) and TLR4* (light blue) are shown as cartoons with their co-receptors MD-2 (green) and MD-2* (light green); LPS molecules are shown as red sticks. LPS binding in MD-2's pocket bridges the two units into an “m”-shaped dimer. Image made with NGL Viewer (Rose <i>et al.</i>, 2018).</p>
+  </div>
+  <div class="q" data-q="f-legend-q">
+    <div class="q-text">Write a legend for the figure you made.</div>
+  </div>
+</section>
+
+<!-- =====================================================================
+     CHAPTER 6 · YOUR RECEPTOR
+     ===================================================================== -->
+<section class="chapter" id="yours" data-num="6" data-title="Your receptor" hidden>
+  <h1>Your receptor</h1>
+  <div class="meta-row"><span class="pill time">after class</span></div>
+  <p class="lede">Now repeat the workflow for the receptor you are studying for your coursework. Everything works for any protein: the UniProt and PDB tabs use live data, and the viewer loads any PDB entry or AlphaFold model – or a file from your computer (drag it onto the viewer).</p>
+  <div class="activity">
+    <div class="act-t">Checklist</div>
+    <ol class="steps">
+      <li data-task="y-uniprot">Find the <b>reviewed, human</b> UniProt entry. Note its accession, function, location and topology, domains, variants and drugs.</li>
+      <li data-task="y-pdb">List its PDB structures. Which parts are covered? Choose one to work with, and justify your choice (method, resolution, completeness, ligands, partners). If there is no structure of the human protein, look for the mouse, rat or even yeast protein, or use UniProt's <b>Similar proteins</b> section to find a related protein that has a structure – and use the AlphaFold model.</li>
+      <li data-task="y-af">Load its AlphaFold model. Where is it confident (pLDDT)? Are the domain arrangements reliable (PAE)?</li>
+      <li data-task="y-compare">If both exist, superpose the model on the experimental structure and compare them.</li>
+      <li data-task="y-figure">Make a figure with a colour key and labels, export it at 2× or more, and write a legend.</li>
+    </ol>
+  </div>
+  <div class="q" data-q="y-notes-uniprot"><div class="q-text">UniProt notes – accession, function, location, domains, variants, drugs:</div></div>
+  <div class="q" data-q="y-notes-pdb"><div class="q-text">Structures – which PDB entry will you use, and why?</div></div>
+  <div class="q" data-q="y-notes-af"><div class="q-text">AlphaFold – what do pLDDT and PAE tell you? How does the model compare with experiment?</div></div>
+  <p><button class="btn primary" type="button" data-export-answers>Download my answers</button></p>
+</section>
+
+<!-- =====================================================================
+     REFERENCE
+     ===================================================================== -->
+<section class="chapter" id="reference" data-num="R" data-title="Reference" hidden>
+  <h1>Reference</h1>
+
+  <h2 id="ref-commands">Viewer commands</h2>
+  <p>Everything in the viewer can also be typed in the <b>Command line</b> (bottom of the viewer). Several commands can be joined with <code>;</code>. Parts of a structure can be named as: a chain (<code>A</code>), a residue or range (<code>A:126</code>, <code>A:264-300</code>), a group from the Workspace (<code>LPS</code>, <code>glycans</code>), <code>sele</code> (the current selection), several of these joined with <code>or</code>, or <a href="https://nglviewer.org/ngl/api/manual/usage/selection-language.html" target="_blank" rel="noopener">NGL selection language</a>. Put a structure name first to choose one of several (<code>3FXI A</code>).</p>
+  <table class="table" id="cmdTable">
+    <tr><th>Command</th><th>What it does</th></tr>
+    <tr><td><code>load 3fxi</code> · <code>load af O00206</code></td><td>Load a PDB entry / AlphaFold model</td></tr>
+    <tr><td><code>show cartoon A</code> · <code>hide all water</code> · <code>only sticks LPS</code></td><td>Styles: cartoon, tube, sticks, ballstick, spheres, surface, glass, lines</td></tr>
+    <tr><td><code>undisplay B or D</code> · <code>display B</code> · <code>isolate A or C</code> · <code>showall</code></td><td>Hide / show parts (like the eye icons)</td></tr>
+    <tr><td><code>color rainbow A</code> · <code>color orange C</code> · <code>color #1f77b4 LPS</code></td><td>Schemes: chain, molecule, rainbow, ss, hydrophobicity, restype, element, cpk, plddt, bfactor, default – or any colour</td></tr>
+    <tr><td><code>select C:126</code> · <code>select near LPS 4.5</code> · <code>select none</code></td><td>Selections</td></tr>
+    <tr><td><code>site LPS 4.5</code> · <code>contacts LPS</code> · <code>contacts off</code></td><td>Binding site and interaction lines</td></tr>
+    <tr><td><code>distance A:264.NE A:1010.O3</code> · <code>distance clear</code></td><td>Measure between two atoms (chain:residue.atom)</td></tr>
+    <tr><td><code>label sele</code> · <code>label3d "MD-2" C</code> · <code>label2d "Title" 0.05 0.05</code> · <code>labels clear</code></td><td>Labels</td></tr>
+    <tr><td><code>key on</code> · <code>key auto</code> · <code>key add red "LPS"</code> · <code>key title "Key"</code></td><td>Colour key</td></tr>
+    <tr><td><code>superpose AF-O00206-F1:A onto 3FXI:A</code></td><td>Superpose chains (reports RMSD)</td></tr>
+    <tr><td><code>center LPS</code> · <code>reset</code> · <code>spin on</code> · <code>background black</code> · <code>opacity 0.3</code></td><td>View settings</td></tr>
+    <tr><td><code>view save "Pocket"</code> · <code>view 1</code> · <code>camera</code> · <code>orient …</code></td><td>Saved views; print/restore an exact orientation</td></tr>
+    <tr><td><code>export png 2</code> · <code>remove 4KXF</code> · <code>clear</code> · <code>help</code></td><td>Other</td></tr>
+  </table>
+
+  <h2 id="ref-icm">Coming from ICM-Browser?</h2>
+  <table class="table">
+    <tr><th>ICM-Browser</th><th>Here</th></tr>
+    <tr><td>PDB search box / File › Open</td><td>PDB ID box / Open file (or drag a file onto the viewer)</td></tr>
+    <tr><td>Workspace panel, check boxes</td><td>Workspace, eye icons</td></tr>
+    <tr><td>“+” next to a chain shows its sequence</td><td>▸ next to a chain shows it in the sequence bar</td></tr>
+    <tr><td>Select, then display tab (wire, xstick, CPK, ribbon, skin)</td><td>Select, then Display tab (Lines, Sticks, Spheres, Cartoon, Surface, See-through)</td></tr>
+    <tr><td>Colour palette</td><td>Colour tab: schemes and single colours</td></tr>
+    <tr><td>Manual selection (drag a box)</td><td>Select tab › Box select</td></tr>
+    <tr><td>Labels tab: 2D / 3D labels, HQ</td><td>Labels &amp; key tab; images are always rendered at high quality on export</td></tr>
+    <tr><td>Camera button → slides</td><td>Views tab › Save view</td></tr>
+    <tr><td>Shutter button (copy image)</td><td>Save image tab › Copy image</td></tr>
+    <tr><td>Terminal</td><td>Command line</td></tr>
+  </table>
+
+  <h2 id="ref-glossary">Glossary</h2>
+  <table class="table">
+    <tr><td><b>Accession</b></td><td>Stable identifier of a UniProt entry, e.g. O00206</td></tr>
+    <tr><td><b>Swiss-Prot / TrEMBL</b></td><td>Reviewed (expert-curated) / unreviewed (automatically annotated) parts of UniProtKB</td></tr>
+    <tr><td><b>Isoform</b></td><td>Protein variant produced from the same gene, e.g. by alternative splicing; one is chosen as “canonical”</td></tr>
+    <tr><td><b>PTM</b></td><td>Post-translational modification, e.g. glycosylation, phosphorylation, disulfide bonds</td></tr>
+    <tr><td><b>Resolution</b></td><td>Level of detail in an X-ray or cryo-EM structure, in Å – smaller is better</td></tr>
+    <tr><td><b>B-factor</b></td><td>How much an atom's position is smeared out (mobility/uncertainty) in an experimental structure</td></tr>
+    <tr><td><b>Asymmetric unit</b></td><td>What was deposited: the smallest part of the crystal from which the whole unit cell can be generated by symmetry – may contain several copies</td></tr>
+    <tr><td><b>Biological assembly</b></td><td>The form believed to exist in the cell (e.g. a monomer or a dimer)</td></tr>
+    <tr><td><b>pLDDT</b></td><td>AlphaFold's per-residue confidence (0–100)</td></tr>
+    <tr><td><b>PAE</b></td><td>Predicted aligned error: AlphaFold's confidence in the relative position of two residues (Å)</td></tr>
+    <tr><td><b>RMSD</b></td><td>Root-mean-square deviation between matched atoms after superposition (Å)</td></tr>
+    <tr><td><b>Hydrogen bond / salt bridge</b></td><td>Polar interactions, typically 2.6–3.5 Å between heavy atoms; a salt bridge is between oppositely charged groups</td></tr>
+  </table>
+
+  <h2 id="ref-teaching">For teaching staff</h2>
+  <ul>
+    <li>Model answers can be hidden for a class: set <code>showModelAnswers: false</code> in <code>assets/js/config.js</code>. Add <code>?answers</code> to the page address to see them anyway.</li>
+    <li>The tutorial structures (3FXI, 2Z65, 4G8A, 4KXF, 1VTO, 1CDW, 1C9B) and the TLR4 AlphaFold model are stored in <code>data/</code> so that chain names and numbers always match the text. All other structures and all UniProt/PDB searches are live.</li>
+    <li>Any ▶ button can run a list of viewer commands: <code>&lt;button class="do" data-cmd="load 1vto; color ss"&gt;</code>. See the README for how to edit the content.</li>
+  </ul>
+
+  <h2 id="ref-credits">Credits and data</h2>
+  <ul>
+    <li>Molecular graphics: <b>NGL Viewer</b> – Rose AS <i>et al.</i> (2018) <i>Bioinformatics</i> 34:3755–3758; Rose AS &amp; Hildebrand PW (2015) <i>Nucleic Acids Res</i> 43:W576–W579 (MIT licence).</li>
+    <li>Structures from the <b>Protein Data Bank</b> (RCSB PDB, rcsb.org; data CC0). 3FXI: Park BS <i>et al.</i> (2009) <i>Nature</i> 458:1191–1195. 2Z65: Kim HM <i>et al.</i> (2007) <i>Cell</i> 130:906–917. 4G8A: Ohto U <i>et al.</i> (2012) <i>J Biol Chem</i> 287:40611–40617. 4KXF: Hu Z <i>et al.</i> (2013) <i>Science</i> 341:172–175. 1CDW: Nikolov DB <i>et al.</i> (1996) <i>PNAS</i> 93:4862–4867. 1C9B: Tsai FT &amp; Sigler PB (2000) <i>EMBO J</i> 19:25–36. 1VTO: Kim JL &amp; Burley SK (1994) <i>Nat Struct Biol</i> 1:638–653.</li>
+    <li>Protein information from <b>UniProt</b> (uniprot.org; CC BY 4.0) – The UniProt Consortium, <i>Nucleic Acids Res</i> (2025).</li>
+    <li>Predicted structures from the <b>AlphaFold Protein Structure Database</b> (CC BY 4.0) – Jumper J <i>et al.</i> (2021) <i>Nature</i> 596:583–589; Varadi M <i>et al.</i> (2024) <i>Nucleic Acids Res</i> 52:D368–D375.</li>
+    <li>Other references: Poltorak A <i>et al.</i> (1998) <i>Science</i> 282:2085–2088; Trompette A <i>et al.</i> (2009) <i>Nature</i> 457:585–588; Opal SM <i>et al.</i> (2013) <i>JAMA</i> 309:1154–1162; Takashima K <i>et al.</i> (2009) <i>Br J Pharmacol</i> 157:1250–1262.</li>
+    <li>Adapted from the module's UniProt, PDB, ICM-Browser and “adding labels and schematics” tutorials and worksheets.</li>
+  </ul>
+</section>
+
+    </aside>
+
+    <div class="splitter" role="separator" aria-orientation="vertical" title="Drag to resize · double-click to reset"></div>
+
+    <!-- ============================ WORKBENCH ============================ -->
+    <section class="bench" aria-label="Workbench">
+      <div class="wb-tabs" role="tablist">
+        <button class="wb-tab on" type="button" role="tab" data-wb="viewer"><svg class="ic" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>3D viewer<span class="dot"></span></button>
+        <button class="wb-tab" type="button" role="tab" data-wb="uniprot"><svg class="ic" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>UniProt<span class="dot"></span></button>
+        <button class="wb-tab" type="button" role="tab" data-wb="pdb"><svg class="ic" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>PDB<span class="dot"></span></button>
+        <button class="bench-close" type="button" aria-label="Back to the tutorial">✕ Tutorial</button>
+      </div>
+      <div class="wb-body">
+        <div class="wb-pane" data-wb="viewer"><div id="viewerRoot"></div></div>
+        <div class="wb-pane" data-wb="uniprot" hidden><div id="uniprotRoot"></div></div>
+        <div class="wb-pane" data-wb="pdb" hidden><div id="pdbRoot"></div></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<button class="bench-fab" type="button" aria-label="Open the 3D viewer and tools"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M12 2l9 5v10l-9 5-9-5V7z"/><path d="M3 7l9 5 9-5M12 12v10"/></svg>Viewer &amp; tools</button>
+<noscript><p style="padding:20px">This page needs JavaScript.</p></noscript>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/vendor/ngl/ngl.js"></script>
+<script src="assets/js/core.js"></script>
+<script src="assets/js/icons.js"></script>
+<script src="assets/js/viewer-core.js"></script>
+<script src="assets/js/annot.js"></script>
+<script src="assets/js/alphafold.js"></script>
+<script src="assets/js/viewer-ui.js"></script>
+<script src="assets/js/commands.js"></script>
+<script src="assets/js/session.js"></script>
+<script src="assets/js/uniprot.js"></script>
+<script src="assets/js/pdb.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
