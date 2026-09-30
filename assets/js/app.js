@@ -152,7 +152,10 @@
      ------------------------------------------------------------------ */
   function initActions() {
     document.addEventListener('click', async (e) => {
-      const b = e.target.closest('[data-cmd],[data-uniprot],[data-pdb],[data-bench],[data-vtab],[data-goto]');
+      // only real controls trigger actions: chapters also carry data-bench, so a bare
+      // [data-bench] selector would catch every click inside a chapter (blocking radio buttons and ticks)
+      const sel = ['cmd', 'uniprot', 'pdb', 'bench', 'vtab', 'goto'].map((k) => `button[data-${k}],a[data-${k}],[role="button"][data-${k}]`).join(',');
+      const b = e.target.closest(sel);
       if (!b || !b.closest('.tut, .modal')) return;
       e.preventDefault();
       if (b.dataset.goto) {
